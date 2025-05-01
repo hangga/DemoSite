@@ -24,8 +24,15 @@ jobs:
       - run:
           name: Scan with ClamAV
           command: |
-            echo "🔍 Starting malware scan in the 'test' directory..."
-            clamscan -r test --infected > scan-report.txt || true
+            SCAN_DIR="test"
+
+            if [ ! -d "$SCAN_DIR" ]; then
+              echo "⚠️ Directory '$SCAN_DIR' does not exist. Skipping malware scan."
+              exit 1
+            fi
+
+            echo "🔍 Starting malware scan in the '$SCAN_DIR' directory..."
+            clamscan -r "$SCAN_DIR" --infected > scan-report.txt || true
 
             if grep -q "FOUND" scan-report.txt; then
               echo "❌ Malware detected!"
