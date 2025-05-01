@@ -10,7 +10,7 @@ jobs:
           name: "Say hello"
           command: "echo Hello, World!"
 
-  malware-scan:  # ✅ Pindahkan ke level sejajar dengan say-hello
+  malware-scan:
     docker:
       - image: cimg/base:stable
     steps:
@@ -24,14 +24,33 @@ jobs:
       - run:
           name: Scan with ClamAV
           command: |
-            clamscan -r test --infected --no-summary || (echo "❌ Malware detected!" && exit 1)
+            SCAN_DIR="."  # ✅ Scan entire working directory
+
+            echo "🔍 Starting malware scan in the '$SCAN_DIR' directory..."
+            clamscan -r "$SCAN_DIR" --infected > scan-report.txt || true
+
+            if grep -q "FOUND" scan-report.txt; then
+              echo "❌ Malware detected!"
+              echo "🦠 Infected files:"
+              grep "FOUND" scan-report.txt
+              echo ""
+              echo "📋 Scan summary:"
+              grep -A 10 "SCAN SUMMARY" scan-report.txt
+              exit 1
+            else
+              echo "✅ No malware found."
+              grep -A 10 "SCAN SUMMARY" scan-report.txt
+            fi
+      - persist_to_workspace:
+          root: .
+          paths:
+            - scan-report.txt
+      - store_artifacts:
+          path: scan-report.txt
+          destination: clamav-scan-report
 
 workflows:
   say-hello-workflow:
     jobs:
       - say-hello
       - malware-scan
-          # filters:
-          #   branches:
-          #     ignore:
-          #       - main
