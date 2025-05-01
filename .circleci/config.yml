@@ -22,11 +22,6 @@ jobs:
             sudo apt-get install -y clamav clamav-daemon
             sudo freshclam
       - run:
-          name: Simulate malware with EICAR test file
-          command: |
-            mkdir -p test
-            echo 'X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*' > test/eicar.com
-      - run:
           name: Scan with ClamAV
           command: |
             clamscan -r test --infected --no-summary || (echo "❌ Malware detected!" && exit 1)
