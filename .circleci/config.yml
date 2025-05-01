@@ -35,7 +35,7 @@ workflows:
   say-hello-workflow:
     jobs:
       - say-hello
-      - malware-scan:
+      - malware-scan
           # filters:
           #   branches:
           #     ignore:
